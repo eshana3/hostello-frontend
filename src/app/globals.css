@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: #0C0A1E;
+    color: #F0EEFF;
+  }
+
+  ::selection {
+    background: rgba(124, 58, 237, 0.35);
+    color: #F0EEFF;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-[#13112A] rounded-2xl border border-[#252248] shadow-[0_1px_2px_rgba(0,0,0,0.3),0_4px_12px_rgba(0,0,0,0.2)];
+  }
+
+  .card-hover {
+    @apply card transition-all duration-200 hover:shadow-[0_4px_24px_rgba(124,58,237,0.15)] hover:-translate-y-0.5 cursor-pointer;
+  }
+
+  .glass {
+    @apply bg-[#13112A]/80 backdrop-blur-xl border border-white/10 shadow-[0_1px_3px_rgba(0,0,0,0.3)];
+  }
+
+  .glass-card {
+    @apply bg-[#13112A]/90 backdrop-blur-md border border-[#252248] rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.3)];
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold rounded-xl px-5 py-2.5 text-sm transition-all duration-150 shadow-sm shadow-[#4C1D95];
+  }
+
+  .btn-accent {
+    @apply inline-flex items-center justify-center gap-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-semibold rounded-xl px-5 py-2.5 text-sm transition-all duration-150 shadow-sm shadow-[#4C1D95];
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 text-[#9896B8] hover:text-[#F0EEFF] hover:bg-[#1A1830] font-medium rounded-xl px-4 py-2 text-sm transition-all duration-150;
+  }
+
+  .section { @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8; }
+  .section-title { @apply text-xl font-bold text-[#F0EEFF] tracking-tight; }
+  .badge { @apply inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full; }
+}
+
+@layer utilities {
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .text-balance { text-wrap: balance; }
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #A78BFA 0%, #7C3AED 50%, #C4B5FD 100%);
+  }
+  .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+  .animate-fade-up { animation: fadeUp 0.5s cubic-bezier(.22,1,.36,1) both; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in { animation: fadeIn 0.3s ease both; }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+}
