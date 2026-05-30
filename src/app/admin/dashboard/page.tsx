@@ -110,13 +110,13 @@ export default function AdminDashboardPage() {
                 innerRadius={40}
                 paddingAngle={3}
               >
-                {stats.categoryBreakdown.map((_: unknown, i: number) => (
+                {stats.categoryBreakdown.map((_, i) => (
                   <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip
                 contentStyle={{ borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 12 }}
-                formatter={(val: number, name: string) => [`${val} sold`, name]}
+                formatter={(val, name) => [`${val} sold`, name]}
               />
               <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
             </PieChart>
@@ -167,7 +167,7 @@ export default function AdminDashboardPage() {
           <h3 className="text-sm font-bold text-[#B5B2D8]">🕐 Recent Activity</h3>
         </div>
         <div className="divide-y divide-slate-50">
-          {stats.recentActivity.map((a: { id: string; type: string; description: string; user: string; hostel: string; time: string }) => (
+          {stats.recentActivity.map((a) => (
             <div key={a.id} className="flex items-center gap-4 px-5 py-3 hover:bg-[#13112A]/60 transition-colors">
               <span className={clsx("text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0", ACTIVITY_COLORS[a.type] ?? "bg-[#1A1830] text-[#9896B8]")}>
                 {ACTIVITY_ICONS[a.type]} {a.type}
