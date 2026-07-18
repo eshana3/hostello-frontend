@@ -1,22 +1,25 @@
 "use client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSocket } from "@/providers/SocketProvider";
-import { useEffect } from "react";
+import { authFetch } from "@/lib/api";
+import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
 import type { Notification } from "@/types/notification";
 
 export function useNotifications(page = 1) {
   const queryClient = useQueryClient();
-  const { socket } = useSocket();
+  const { socket, connected } = useSocket();
 
   const query = useQuery<{ notifications: Notification[]; unreadCount: number; total: number }>({
     queryKey: ["notifications", page],
     queryFn: async () => {
-      const res = await fetch(`/api/notifications?page=${page}&limit=20`);
+      const res = await authFetch(`/api/notifications?page=${page}&limit=20`);
       if (!res.ok) throw new Error("Failed");
       return res.json();
     },
-    refetchInterval: 60000,
+    // Poll only when the socket is not connected. When the socket is live,
+    // real-time events invalidate the cache immediately — polling is redundant.
+    refetchInterval: connected ? false : 60000,
   });
 
   // Real-time: listen for new notifications via socket
@@ -32,15 +35,15 @@ export function useNotifications(page = 1) {
     return () => socket.off("notification", handler);
   }, [socket, queryClient]);
 
-  const markAllRead = async () => {
-    await fetch("/api/notifications", { method: "PATCH" });
+  const markAllRead = useCallback(async () => {
+    await authFetch("/api/notifications", { method: "PATCH" });
     queryClient.invalidateQueries({ queryKey: ["notifications"] });
-  };
+  }, [queryClient]);
 
-  const markOneRead = async (id: string) => {
-    await fetch(`/api/notifications/${id}`, { method: "PATCH" });
+  const markOneRead = useCallback(async (id: string) => {
+    await authFetch(`/api/notifications/${id}`, { method: "PATCH" });
     queryClient.invalidateQueries({ queryKey: ["notifications"] });
-  };
+  }, [queryClient]);
 
   return { ...query, markAllRead, markOneRead };
 }

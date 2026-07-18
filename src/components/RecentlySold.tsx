@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useProducts } from "@/hooks/useProducts";
 import ProductCard from "./ProductCard";
 import { BadgeCheck } from "lucide-react";
@@ -8,7 +8,7 @@ export default function RecentlySold() {
   if (!isLoading && !data?.products?.length) return null;
 
   return (
-    <section className="bg-[#131425] border-y border-white/[0.08] py-10">
+    <section className="bg-[#151521] border-y border-white/[0.08] py-6 sm:py-10">
       <div className="section">
         <div className="flex items-center gap-2 mb-5">
           <div className="w-7 h-7 bg-emerald-900/40 rounded-lg flex items-center justify-center">
@@ -20,7 +20,7 @@ export default function RecentlySold() {
         {isLoading ? (
           <div className="flex gap-3.5 overflow-x-auto pb-2 scrollbar-hide">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="min-w-[180px] h-60 bg-[#13112A] rounded-2xl border border-white/[0.08] animate-pulse" />
+              <div key={i} className="min-w-[180px] h-60 bg-[#151521] rounded-2xl border border-white/[0.08] animate-pulse" />
             ))}
           </div>
         ) : (

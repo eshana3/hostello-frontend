@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { Suspense } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useProducts } from "@/hooks/useProducts";
@@ -31,18 +31,18 @@ function HostelContent() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Back */}
-      <Link href="/products" className="inline-flex items-center gap-1 text-sm text-[#A78BFA] hover:underline mb-6">
+      <Link href="/products" className="inline-flex items-center gap-1 text-sm text-[#FF8C00] hover:underline mb-6">
         <ArrowLeft className="w-4 h-4" /> Back to all products
       </Link>
 
       {/* Header */}
-      <div className="flex items-center gap-3 mb-8 p-4 bg-[#1A1830] rounded-xl shadow-sm border border-[#252248]">
-        <div className="w-12 h-12 rounded-full bg-[#3D2785] flex items-center justify-center">
-          <MapPin className="w-6 h-6 text-[#A78BFA]" />
+      <div className="flex items-center gap-3 mb-8 p-4 bg-[#1E1E2E] rounded-xl shadow-sm border border-[#1E1E2E]">
+        <div className="w-12 h-12 rounded-full bg-[#1E1E2E] flex items-center justify-center">
+          <MapPin className="w-6 h-6 text-[#FF8C00]" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-[#F0EEFF]">{hostelId}</h1>
-          <p className="text-sm text-[#9896B8]">
+          <h1 className="text-2xl font-bold text-[#FFFFFF]">{hostelId}</h1>
+          <p className="text-sm text-[#9CA3AF]">
             {data ? `${data.total} active listing${data.total !== 1 ? "s" : ""}` : "Loading…"}
           </p>
         </div>
@@ -59,7 +59,7 @@ function HostelContent() {
 
 export default function HostelPage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center py-40 text-[#5E5B82]">Loading...</div>}>
+    <Suspense fallback={<div className="flex items-center justify-center py-40 text-[#9CA3AF]">Loading...</div>}>
       <HostelContent />
     </Suspense>
   );

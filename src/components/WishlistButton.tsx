@@ -1,4 +1,5 @@
 "use client";
+import { memo } from "react";
 import { Heart } from "lucide-react";
 import { useWishlist } from "@/hooks/useWishlist";
 import clsx from "clsx";
@@ -9,7 +10,7 @@ interface WishlistButtonProps {
   className?: string;
 }
 
-export default function WishlistButton({ productId, size = "md", className }: WishlistButtonProps) {
+function WishlistButton({ productId, size = "md", className }: WishlistButtonProps) {
   const { toggle, isWishlisted } = useWishlist();
   const wishlisted = isWishlisted(productId);
 
@@ -21,7 +22,7 @@ export default function WishlistButton({ productId, size = "md", className }: Wi
         size === "sm" ? "w-7 h-7" : "w-9 h-9",
         wishlisted
           ? "bg-rose-500 text-white shadow-sm shadow-rose-200"
-          : "bg-[#13112A] border border-[#252248] text-[#9896B8] hover:text-rose-400 hover:border-rose-500/40 shadow-[0_1px_3px_rgba(0,0,0,0.2)]",
+          : "bg-[#151521] border border-[#1E1E2E] text-[#9CA3AF] hover:text-rose-400 hover:border-rose-500/40 shadow-[0_1px_3px_rgba(0,0,0,0.2)]",
         className
       )}
       title={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
@@ -30,3 +31,5 @@ export default function WishlistButton({ productId, size = "md", className }: Wi
     </button>
   );
 }
+
+export default memo(WishlistButton);

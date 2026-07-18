@@ -1,34 +1,47 @@
 import { NextRequest, NextResponse } from "next/server";
-import { MOCK_POLLS, MOCK_POLL_REPLIES } from "@/lib/mockPolls";
-import type { Poll, PollReply } from "@/types/poll";
-import { CURRENT_USER_ID, CURRENT_USER_NAME } from "@/lib/mockChats";
 
-const pollsStore: Poll[] = [...MOCK_POLLS];
-const repliesStore: Record<string, PollReply[]> = { ...MOCK_POLL_REPLIES };
+const BACKEND = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
 
+function getAuthHeader(req: NextRequest): Record<string, string> {
+  const auth = req.headers.get("authorization");
+  return auth ? { authorization: auth } : {};
+}
+
+function avatarUrl(name: string): string {
+  return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}&backgroundColor=7C3AED`;
+}
+
+// POST /api/polls/:id/reply — add a reply to a poll
 export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const poll = pollsStore.find(p => p.id === params.id);
-  if (!poll) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  if (poll.status === "closed") return NextResponse.json({ error: "Poll is closed" }, { status: 400 });
+  const body = await req.json().catch(() => ({}));
 
-  const body = await req.json();
-  const reply: PollReply = {
-    id: `reply_${Date.now()}`,
+  const upstream = await fetch(`${BACKEND}/api/polls/${params.id}/reply`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getAuthHeader(req) },
+    body: JSON.stringify({ message: body.message }),
+  });
+
+  if (!upstream.ok) {
+    const err = await upstream.json().catch(() => ({}));
+    return NextResponse.json(err, { status: upstream.status });
+  }
+
+  const data = await upstream.json();
+  const reply = data.reply ?? {};
+  const sellerId = typeof reply.seller === "object" ? (reply.seller?._id?.toString() ?? "") : (reply.seller?.toString() ?? "");
+  const sellerName = typeof reply.seller === "object" ? (reply.seller?.name ?? "Unknown") : "Unknown";
+
+  return NextResponse.json({
+    id: reply._id?.toString() ?? "",
     pollId: params.id,
-    sellerId: CURRENT_USER_ID,
-    sellerName: CURRENT_USER_NAME,
-    sellerAvatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(CURRENT_USER_NAME)}&backgroundColor=7C3AED`,
-    message: body.message,
-    price: body.price ? Number(body.price) : undefined,
-    createdAt: new Date().toISOString(),
-  };
-
-  if (!repliesStore[params.id]) repliesStore[params.id] = [];
-  repliesStore[params.id].push(reply);
-  poll.replyCount = (poll.replyCount ?? 0) + 1;
-
-  return NextResponse.json(reply, { status: 201 });
+    sellerId,
+    sellerName,
+    sellerAvatar: avatarUrl(sellerName),
+    message: reply.message ?? body.message ?? "",
+    price: body.price ?? undefined,
+    createdAt: reply.createdAt ?? new Date().toISOString(),
+  }, { status: 201 });
 }

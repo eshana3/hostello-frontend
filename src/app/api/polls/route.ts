@@ -1,46 +1,72 @@
 import { NextRequest, NextResponse } from "next/server";
-import { MOCK_POLLS } from "@/lib/mockPolls";
-import type { Poll } from "@/types/poll";
-import { CURRENT_USER_ID, CURRENT_USER_NAME } from "@/lib/mockChats";
 
-const pollsStore: Poll[] = [...MOCK_POLLS];
+const BACKEND = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
 
-export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const hostel   = searchParams.get("hostel");
-  const category = searchParams.get("category");
-  const search   = searchParams.get("search")?.toLowerCase();
-  const status   = searchParams.get("status") ?? "open";
-
-  let results = pollsStore.filter(p => status === "all" ? true : p.status === status);
-  if (hostel)   results = results.filter(p => p.hostelId === hostel);
-  if (category) results = results.filter(p => p.category === category);
-  if (search)   results = results.filter(p =>
-    p.itemName.toLowerCase().includes(search) ||
-    p.description.toLowerCase().includes(search)
-  );
-
-  return NextResponse.json(results.sort((a, b) =>
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  ));
+function getAuthHeader(req: NextRequest): Record<string, string> {
+  const auth = req.headers.get("authorization");
+  return auth ? { authorization: auth } : {};
 }
 
-export async function POST(req: NextRequest) {
-  const body = await req.json();
-  const newPoll: Poll = {
-    id: `poll_${Date.now()}`,
-    itemName: body.itemName,
-    description: body.description,
-    category: body.category,
-    maxPrice: body.maxPrice ? Number(body.maxPrice) : undefined,
-    hostelId: body.hostelId,
-    buyerId: CURRENT_USER_ID,
-    buyerName: CURRENT_USER_NAME,
-    buyerAvatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(CURRENT_USER_NAME)}&backgroundColor=7C3AED`,
-    status: "open",
-    createdAt: new Date().toISOString(),
-    replyCount: 0,
+function avatarUrl(name: string): string {
+  return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}&backgroundColor=7C3AED`;
+}
+
+export function transformPoll(p: any): any {
+  const hostelName = typeof p.hostel === "object" ? (p.hostel?.name ?? "") : (p.hostel ?? "");
+  const buyerId = typeof p.buyer === "object" ? (p.buyer?._id?.toString() ?? "") : (p.buyer?.toString() ?? "");
+  const buyerName = typeof p.buyer === "object" ? (p.buyer?.name ?? "Unknown") : "Unknown";
+
+  return {
+    id: p._id?.toString() ?? "",
+    itemName: p.itemName ?? "",
+    description: p.description ?? "",
+    category: p.category ?? "",
+    maxPrice: p.maxPrice ?? undefined,
+    hostelId: hostelName,
+    buyerId,
+    buyerName,
+    buyerAvatar: avatarUrl(buyerName),
+    status: p.status ?? "open",
+    createdAt: p.createdAt ?? new Date().toISOString(),
+    replyCount: Array.isArray(p.replies) ? p.replies.length : (p.replyCount ?? 0),
   };
-  pollsStore.unshift(newPoll);
-  return NextResponse.json(newPoll, { status: 201 });
+}
+
+// GET /api/polls — list polls with optional filters
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const qs = searchParams.toString();
+
+  const upstream = await fetch(`${BACKEND}/api/polls${qs ? "?" + qs : ""}`, {
+    headers: { ...getAuthHeader(req) },
+    cache: "no-store",
+  });
+
+  if (!upstream.ok) {
+    const err = await upstream.json().catch(() => ({}));
+    return NextResponse.json(err, { status: upstream.status });
+  }
+
+  const data = await upstream.json();
+  // Backend returns { polls, total, page, pages } — frontend expects Poll[]
+  return NextResponse.json((data.polls ?? []).map(transformPoll));
+}
+
+// POST /api/polls — create a new poll request
+export async function POST(req: NextRequest) {
+  const body = await req.json().catch(() => ({}));
+
+  const upstream = await fetch(`${BACKEND}/api/polls`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getAuthHeader(req) },
+    body: JSON.stringify(body),
+  });
+
+  if (!upstream.ok) {
+    const err = await upstream.json().catch(() => ({}));
+    return NextResponse.json(err, { status: upstream.status });
+  }
+
+  const data = await upstream.json();
+  return NextResponse.json(transformPoll(data.poll ?? {}), { status: 201 });
 }

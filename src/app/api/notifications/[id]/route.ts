@@ -1,13 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-import { MOCK_NOTIFICATIONS } from "@/lib/mockNotifications";
-import type { Notification } from "@/types/notification";
 
-let store: Notification[] = [...MOCK_NOTIFICATIONS];
+const BACKEND = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
 
+function getAuthHeader(req: NextRequest): Record<string, string> {
+  const auth = req.headers.get("authorization");
+  return auth ? { authorization: auth } : {};
+}
+
+// PATCH /api/notifications/:id — mark single notification as read
+// Frontend sends PATCH /:id; backend expects PATCH /:id/read
 export async function PATCH(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  store = store.map(n => n.id === params.id ? { ...n, read: true } : n);
-  return NextResponse.json({ success: true });
+  const upstream = await fetch(`${BACKEND}/api/notifications/${params.id}/read`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...getAuthHeader(req) },
+  });
+
+  const data = await upstream.json().catch(() => ({ success: true }));
+  return NextResponse.json(data, { status: upstream.ok ? 200 : upstream.status });
 }

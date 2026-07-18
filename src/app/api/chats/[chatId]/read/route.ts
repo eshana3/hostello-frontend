@@ -1,9 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function POST(
-  _req: NextRequest,
-  { params }: { params: { chatId: string } }
-) {
-  // TODO: update unread count in DB
-  return NextResponse.json({ success: true, chatId: params.chatId });
+// The socket handler (mark_read event) is the authoritative path for marking messages read.
+// This REST endpoint exists only as a fire-and-forget fallback in useChats.ts.
+export async function POST() {
+  return NextResponse.json({ success: true });
 }

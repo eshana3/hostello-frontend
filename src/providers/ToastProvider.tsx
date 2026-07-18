@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { CheckCircle, XCircle, Info, X } from "lucide-react";
 import clsx from "clsx";
@@ -33,7 +33,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider value={{ toast }}>
       {children}
       {/* Toast container */}
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
+      <div className="fixed bottom-4 left-4 right-4 sm:left-auto z-50 flex flex-col items-stretch sm:items-end gap-2 pointer-events-none">
         {toasts.map(t => (
           <ToastItem key={t.id} toast={t} onRemove={remove} />
         ))}
@@ -51,24 +51,24 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
   const icons = {
     success: <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0" />,
     error:   <XCircle    className="w-4 h-4 text-red-500 flex-shrink-0" />,
-    info:    <Info       className="w-4 h-4 text-[#A78BFA] flex-shrink-0" />,
+    info:    <Info       className="w-4 h-4 text-[#FF8C00] flex-shrink-0" />,
   };
 
   const borders = {
     success: "border-emerald-200",
     error:   "border-red-200",
-    info:    "border-[#4C3699]",
+    info:    "border-[#FF6B00]",
   };
 
   return (
     <div className={clsx(
-      "pointer-events-auto flex items-start gap-3 bg-[#13112A]/95 backdrop-blur-sm border rounded-xl shadow-lg px-4 py-3 min-w-[260px] max-w-[340px]",
+      "pointer-events-auto flex items-start gap-3 bg-[#151521]/95 backdrop-blur-sm border rounded-xl shadow-lg px-4 py-3 min-w-[260px] max-w-[340px]",
       "animate-in slide-in-from-bottom-2 duration-300",
       borders[toast.type]
     )}>
       {icons[toast.type]}
-      <p className="text-sm text-[#B5B2D8] flex-1 leading-snug">{toast.message}</p>
-      <button onClick={() => onRemove(toast.id)} className="text-[#3D3B62] hover:text-[#7B78A0] transition-colors flex-shrink-0">
+      <p className="text-sm text-[#C9D1D9] flex-1 leading-snug">{toast.message}</p>
+      <button onClick={() => onRemove(toast.id)} className="text-[#6B7280] hover:text-[#9CA3AF] transition-colors flex-shrink-0">
         <X className="w-3.5 h-3.5" />
       </button>
     </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useCategories } from "@/hooks/useCategories";
 import { useHostels } from "@/hooks/useHostels";
 import type { ProductFilters } from "@/types";
@@ -7,6 +7,7 @@ import { SlidersHorizontal, X } from "lucide-react";
 interface Props {
   filters: ProductFilters;
   onFilterChange: (key: string, value: string | null) => void;
+  inline?: boolean;
 }
 
 const CONDITIONS = [
@@ -20,13 +21,13 @@ const CONDITIONS = [
 function FilterSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="text-[10px] font-bold text-[#5E5B82] uppercase tracking-widest mb-2.5">{title}</p>
+      <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest mb-2.5">{title}</p>
       {children}
     </div>
   );
 }
 
-export default function FilterSidebar({ filters, onFilterChange }: Props) {
+export default function FilterSidebar({ filters, onFilterChange, inline = false }: Props) {
   const { categories }       = useCategories();
   const { data: hostelGroups } = useHostels();
 
@@ -34,16 +35,16 @@ export default function FilterSidebar({ filters, onFilterChange }: Props) {
     .filter(k => (filters as Record<string,unknown>)[k]).length;
 
   return (
-    <aside className="w-56 shrink-0 hidden lg:block">
-      <div className="bg-[#13112A] rounded-2xl border border-[#252248] shadow-[0_1px_3px_rgba(0,0,0,0.3)] p-4 sticky top-20 space-y-5">
+    <aside className={inline ? "w-full" : "w-56 shrink-0 hidden lg:block"}>
+      <div className="bg-[#151521] rounded-2xl border border-[#1E1E2E] shadow-[0_1px_3px_rgba(0,0,0,0.3)] p-4 sticky top-20 space-y-5">
 
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-[#7B78A0]" />
+            <SlidersHorizontal className="w-3.5 h-3.5 text-[#9CA3AF]" />
             <span className="text-sm font-bold text-white">Filters</span>
             {activeCount > 0 && (
-              <span className="w-4 h-4 bg-[#7C3AED] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+              <span className="w-4 h-4 bg-[#FF6B00] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                 {activeCount}
               </span>
             )}
@@ -57,12 +58,12 @@ export default function FilterSidebar({ filters, onFilterChange }: Props) {
           )}
         </div>
 
-        <div className="h-px bg-[#252248]" />
+        <div className="h-px bg-[#1E1E2E]" />
 
         {/* Category */}
         <FilterSection title="Category">
           <select value={filters.category ?? ""} onChange={e => onFilterChange("category", e.target.value || null)}
-            className="w-full border border-white/[0.08] rounded-xl px-3 py-2 text-xs bg-[#1A1830] text-[#B5B2D8] focus:outline-none focus:border-[#7C3AED] focus:ring-2 focus:ring-[#4C3699] transition-all appearance-none">
+            className="w-full border border-white/[0.08] rounded-xl px-3 py-2 text-xs bg-[#1E1E2E] text-[#C9D1D9] focus:outline-none focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00] transition-all appearance-none">
             <option value="">All Categories</option>
             {categories.map(c => <option key={c.id} value={c.id}>{c.emoji} {c.name}</option>)}
           </select>
@@ -71,11 +72,13 @@ export default function FilterSidebar({ filters, onFilterChange }: Props) {
         {/* Hostel */}
         <FilterSection title="Hostel">
           <select value={filters.hostel ?? ""} onChange={e => onFilterChange("hostel", e.target.value || null)}
-            className="w-full border border-white/[0.08] rounded-xl px-3 py-2 text-xs bg-[#1A1830] text-[#B5B2D8] focus:outline-none focus:border-[#7C3AED] focus:ring-2 focus:ring-[#4C3699] transition-all appearance-none">
+            className="w-full border border-white/[0.08] rounded-xl px-3 py-2 text-xs bg-[#1E1E2E] text-[#C9D1D9] focus:outline-none focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00] transition-all appearance-none">
             <option value="">All Hostels</option>
-            {(hostelGroups ?? []).map(group => (
-              <optgroup key={group.type} label={group.label}>
-                {group.hostels.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
+            {(hostelGroups ?? []).map((group: any) => (
+              <optgroup key={group.id} label={group.name}>
+                {(group.hostels ?? []).map((h: string) => (
+                  <option key={h} value={h}>{h}</option>
+                ))}
               </optgroup>
             ))}
           </select>
@@ -88,19 +91,19 @@ export default function FilterSidebar({ filters, onFilterChange }: Props) {
               <label key={c.id}
                 className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg cursor-pointer text-xs font-medium transition-all ${
                   filters.condition === c.id
-                    ? "bg-[#2D1B69] text-[#8B5CF6] border border-[#3D2785]"
-                    : "text-white/60 hover:bg-[#1A1830]/10 border border-transparent"
+                    ? "bg-[#151521] text-[#FF6B00] border border-[#1E1E2E]"
+                    : "text-white/60 hover:bg-[#1E1E2E]/10 border border-transparent"
                 }`}>
                 <input type="radio" name="condition" value={c.id}
                   checked={filters.condition === c.id}
                   onChange={() => onFilterChange("condition", c.id)}
-                  className="accent-[#7C3AED] w-3 h-3" />
+                  className="accent-[#FF6B00] w-3 h-3" />
                 {c.label}
               </label>
             ))}
             {filters.condition && (
               <button onClick={() => onFilterChange("condition", null)}
-                className="text-[10px] text-[#5E5B82] hover:text-[#9896B8] mt-1 transition-colors">
+                className="text-[10px] text-[#9CA3AF] hover:text-[#9CA3AF] mt-1 transition-colors">
                 Clear condition
               </button>
             )}
@@ -113,12 +116,12 @@ export default function FilterSidebar({ filters, onFilterChange }: Props) {
             <input type="number" placeholder="Min" min={0}
               defaultValue={filters.minPrice ?? ""}
               onBlur={e => onFilterChange("minPrice", e.target.value || null)}
-              className="w-full border border-white/[0.08] rounded-xl px-2.5 py-2 text-xs bg-[#1A1830] text-[#B5B2D8] focus:outline-none focus:border-[#7C3AED] focus:ring-2 focus:ring-[#4C3699] transition-all" />
-            <span className="text-[#3D3B62] text-xs shrink-0">–</span>
+              className="w-full border border-white/[0.08] rounded-xl px-2.5 py-2 text-xs bg-[#1E1E2E] text-[#C9D1D9] focus:outline-none focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00] transition-all" />
+            <span className="text-[#6B7280] text-xs shrink-0">–</span>
             <input type="number" placeholder="Max" min={0}
               defaultValue={filters.maxPrice ?? ""}
               onBlur={e => onFilterChange("maxPrice", e.target.value || null)}
-              className="w-full border border-white/[0.08] rounded-xl px-2.5 py-2 text-xs bg-[#1A1830] text-[#B5B2D8] focus:outline-none focus:border-[#7C3AED] focus:ring-2 focus:ring-[#4C3699] transition-all" />
+              className="w-full border border-white/[0.08] rounded-xl px-2.5 py-2 text-xs bg-[#1E1E2E] text-[#C9D1D9] focus:outline-none focus:border-[#FF6B00] focus:ring-2 focus:ring-[#FF6B00] transition-all" />
           </div>
         </FilterSection>
       </div>

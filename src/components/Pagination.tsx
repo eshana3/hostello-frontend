@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+﻿import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Props {
   currentPage: number;
@@ -21,26 +21,26 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pr
   }
 
   return (
-    <div className="flex items-center justify-center gap-2 mt-8">
+    <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mt-8">
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="p-2 rounded-lg border border-[#252248] hover:bg-[#1A1830] text-[#9896B8] disabled:opacity-40 disabled:cursor-not-allowed"
+        className="p-1.5 sm:p-2 rounded-lg border border-[#1E1E2E] hover:bg-[#1E1E2E] text-[#9CA3AF] disabled:opacity-40 disabled:cursor-not-allowed"
       >
         <ChevronLeft className="w-4 h-4" />
       </button>
 
       {pages.map((p, i) =>
         p === "..." ? (
-          <span key={`ellipsis-${i}`} className="px-2 text-[#5E5B82]">...</span>
+          <span key={`ellipsis-${i}`} className="px-1 sm:px-2 text-[#9CA3AF]">...</span>
         ) : (
           <button
             key={p}
             onClick={() => onPageChange(p as number)}
-            className={`w-9 h-9 rounded-lg text-sm font-medium transition ${
+            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg text-xs sm:text-sm font-medium transition ${
               p === currentPage
-                ? "bg-[#7C3AED] text-white"
-                : "border border-[#252248] hover:bg-[#1A1830] text-[#9896B8]"
+                ? "bg-[#FF6B00] text-white"
+                : "border border-[#1E1E2E] hover:bg-[#1E1E2E] text-[#9CA3AF]"
             }`}
           >
             {p}
@@ -51,7 +51,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pr
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="p-2 rounded-lg border border-[#252248] hover:bg-[#1A1830] text-[#9896B8] disabled:opacity-40 disabled:cursor-not-allowed"
+        className="p-1.5 sm:p-2 rounded-lg border border-[#1E1E2E] hover:bg-[#1E1E2E] text-[#9CA3AF] disabled:opacity-40 disabled:cursor-not-allowed"
       >
         <ChevronRight className="w-4 h-4" />
       </button>

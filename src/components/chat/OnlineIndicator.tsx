@@ -1,4 +1,4 @@
-import clsx from "clsx";
+﻿import clsx from "clsx";
 
 interface OnlineIndicatorProps {
   online?: boolean;
@@ -10,9 +10,9 @@ export default function OnlineIndicator({ online, size = "sm", className }: Onli
   return (
     <span
       className={clsx(
-        "rounded-full border-2 border-[#0C0A1E] flex-shrink-0",
+        "rounded-full border-2 border-[#0D0D1A] flex-shrink-0",
         size === "sm" ? "w-2.5 h-2.5" : "w-3.5 h-3.5",
-        online ? "bg-emerald-400" : "bg-[#3D3B62]",
+        online ? "bg-emerald-400" : "bg-[#6B7280]",
         className
       )}
       title={online ? "Online" : "Offline"}

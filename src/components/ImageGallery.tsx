@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react";
 import clsx from "clsx";
@@ -17,7 +17,7 @@ export default function ImageGallery({ images, alt }: ImageGalleryProps) {
 
   return (
     <>
-      <div className="relative rounded-2xl overflow-hidden bg-[#131425] aspect-square group">
+      <div className="relative rounded-2xl overflow-hidden bg-[#151521] aspect-square group">
         <img
           src={images[active]}
           alt={alt}
@@ -26,21 +26,21 @@ export default function ImageGallery({ images, alt }: ImageGalleryProps) {
         {images.length > 1 && (
           <>
             <button onClick={prev}
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#1A1830]/90 text-[#F0EEFF] flex items-center justify-center shadow hover:bg-[#252248] transition-all opacity-0 group-hover:opacity-100">
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#1E1E2E]/90 text-[#FFFFFF] flex items-center justify-center shadow hover:bg-[#1E1E2E] transition-all opacity-0 group-hover:opacity-100">
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button onClick={next}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#1A1830]/90 text-[#F0EEFF] flex items-center justify-center shadow hover:bg-[#252248] transition-all opacity-0 group-hover:opacity-100">
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#1E1E2E]/90 text-[#FFFFFF] flex items-center justify-center shadow hover:bg-[#1E1E2E] transition-all opacity-0 group-hover:opacity-100">
               <ChevronRight className="w-4 h-4" />
             </button>
           </>
         )}
         <button onClick={() => setZoom(true)}
-          className="absolute top-2 right-2 w-8 h-8 rounded-full bg-[#1A1830]/90 text-[#F0EEFF] flex items-center justify-center shadow hover:bg-[#252248] transition-all opacity-0 group-hover:opacity-100">
+          className="absolute top-2 right-2 w-8 h-8 rounded-full bg-[#1E1E2E]/90 text-[#FFFFFF] flex items-center justify-center shadow hover:bg-[#1E1E2E] transition-all opacity-0 group-hover:opacity-100">
           <ZoomIn className="w-4 h-4" />
         </button>
         {images.length > 1 && (
-          <div className="absolute bottom-2 right-2 text-xs bg-[#7C3AED]/50 text-white px-2 py-0.5 rounded-full">
+          <div className="absolute bottom-2 right-2 text-xs bg-[#FF6B00]/50 text-white px-2 py-0.5 rounded-full">
             {active + 1}/{images.length}
           </div>
         )}
@@ -52,7 +52,7 @@ export default function ImageGallery({ images, alt }: ImageGalleryProps) {
             <button key={i} onClick={() => setActive(i)}
               className={clsx(
                 "flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all",
-                i === active ? "border-[#7C3AED] shadow-md" : "border-transparent opacity-60 hover:opacity-100"
+                i === active ? "border-[#FF6B00] shadow-md" : "border-transparent opacity-60 hover:opacity-100"
               )}>
               <img src={src} alt={`${alt} ${i + 1}`} className="w-full h-full object-cover" />
             </button>
@@ -64,7 +64,7 @@ export default function ImageGallery({ images, alt }: ImageGalleryProps) {
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={() => setZoom(false)}>
           <button onClick={() => setZoom(false)}
-            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-[#1A1830]/30 transition-all">
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-[#1E1E2E]/30 transition-all">
             <X className="w-5 h-5" />
           </button>
           <img

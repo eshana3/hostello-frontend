@@ -1,29 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
-import { MOCK_PRODUCTS } from "@/lib/mockData";
 
+const BACKEND = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
+
+function getAuthHeader(req: NextRequest): Record<string, string> {
+  const auth = req.headers.get("authorization");
+  return auth ? { authorization: auth } : {};
+}
+
+// GET /api/sellers/:id — proxy to real backend seller endpoint
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const sellerId = params.id;
-  const all = MOCK_PRODUCTS.filter(p => p.sellerId === sellerId);
-  if (!all.length) return NextResponse.json({ error: "Seller not found" }, { status: 404 });
+  const upstream = await fetch(`${BACKEND}/api/sellers/${params.id}`, {
+    headers: { ...getAuthHeader(req) },
+    cache: "no-store",
+  });
 
-  const first = all[0];
-  const active = all.filter(p => !p.sold);
-  const sold = all.filter(p => p.sold);
+  if (!upstream.ok) {
+    const err = await upstream.json().catch(() => ({}));
+    return NextResponse.json(err, { status: upstream.status });
+  }
 
-  const seller = {
-    id: sellerId,
-    name: first.sellerName,
-    hostelId: first.hostelId,
-    avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(first.sellerName)}&backgroundColor=7C3AED`,
-    totalListings: all.length,
-    activeListings: active.length,
-    soldListings: sold.length,
-    memberSince: "Jan 2024",
-    responseRate: "92%",
-  };
-
-  return NextResponse.json({ seller, active, sold });
+  return NextResponse.json(await upstream.json());
 }

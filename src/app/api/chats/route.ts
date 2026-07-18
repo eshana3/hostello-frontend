@@ -1,45 +1,86 @@
 import { NextRequest, NextResponse } from "next/server";
-import { MOCK_CHATS, CURRENT_USER_ID } from "@/lib/mockChats";
 
-// In-memory store — replace with DB when backend is ready
-let chats = [...MOCK_CHATS];
+const BACKEND = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
 
-export async function GET() {
-  const userChats = chats.filter(c => c.participants.includes(CURRENT_USER_ID));
-  const sorted = [...userChats].sort((a, b) =>
-    new Date(b.lastMessageTime ?? 0).getTime() - new Date(a.lastMessageTime ?? 0).getTime()
-  );
-  return NextResponse.json(sorted);
+function getAuthHeader(req: NextRequest): Record<string, string> {
+  const auth = req.headers.get("authorization");
+  return auth ? { authorization: auth } : {};
 }
 
-export async function POST(req: NextRequest) {
-  const { productId, sellerId, sellerName, productTitle, productImageUrl } = await req.json();
+function avatarUrl(name: string): string {
+  return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}&backgroundColor=7C3AED`;
+}
 
-  // Return existing chat if one exists
-  const existing = chats.find(c =>
-    c.participants.includes(CURRENT_USER_ID) &&
-    c.participants.includes(sellerId) &&
-    c.productId === productId
-  );
-  if (existing) return NextResponse.json(existing);
+function transformChat(chat: any): any {
+  const other = chat.otherParticipant ?? {};
+  const otherId = other._id?.toString() ?? "";
+  const otherName = other.name ?? "Unknown";
 
-  const newChat = {
-    id: `chat_${Date.now()}`,
-    participants: [CURRENT_USER_ID, sellerId],
-    participantNames: { [CURRENT_USER_ID]: "You", [sellerId]: sellerName },
-    participantAvatars: {
-      [CURRENT_USER_ID]: `https://api.dicebear.com/7.x/initials/svg?seed=You&backgroundColor=7C3AED`,
-      [sellerId]: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(sellerName)}&backgroundColor=7C3AED`,
-    },
-    lastMessage: undefined,
-    lastMessageTime: new Date().toISOString(),
-    lastMessageSenderId: undefined,
-    unreadCount: 0,
-    productId,
-    productTitle,
-    productImageUrl,
+  const lastMsg = chat.lastMessage;
+  const prod = chat.product;
+  const prodImages = prod?.images ?? [];
+  const prodImageUrl = typeof prodImages[0] === "string"
+    ? prodImages[0]
+    : (prodImages[0]?.url ?? "");
+
+  return {
+    id: chat._id?.toString() ?? "",
+    participants: [otherId],
+    participantNames: { [otherId]: otherName },
+    participantAvatars: { [otherId]: avatarUrl(otherName) },
+    lastMessage: lastMsg?.text ?? undefined,
+    lastMessageTime: lastMsg?.timestamp ?? chat.updatedAt,
+    lastMessageSenderId: lastMsg?.sender?.toString() ?? undefined,
+    unreadCount: chat.unreadCount ?? 0,
+    productId: prod?._id?.toString() ?? undefined,
+    productTitle: prod?.title ?? undefined,
+    productImageUrl: prodImageUrl || undefined,
   };
+}
 
-  chats.push(newChat);
-  return NextResponse.json(newChat, { status: 201 });
+// GET /api/chats — list chats for current user
+export async function GET(req: NextRequest) {
+  const upstream = await fetch(`${BACKEND}/api/chats`, {
+    headers: { ...getAuthHeader(req) },
+    cache: "no-store",
+  });
+
+  if (!upstream.ok) {
+    const err = await upstream.json().catch(() => ({}));
+    return NextResponse.json(err, { status: upstream.status });
+  }
+
+  const data = await upstream.json();
+  const chats: any[] = data.chats ?? [];
+  return NextResponse.json(chats.map(transformChat));
+}
+
+// POST /api/chats — create or get existing chat
+// Body: { recipientId, productId? } OR legacy { sellerId, productId, ... }
+export async function POST(req: NextRequest) {
+  const body = await req.json().catch(() => ({}));
+
+  // Normalise: legacy frontend sends "sellerId", backend expects "recipientId"
+  const upstream = await fetch(`${BACKEND}/api/chats`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getAuthHeader(req) },
+    body: JSON.stringify({
+      recipientId: body.recipientId ?? body.sellerId,
+      productId: body.productId,
+    }),
+  });
+
+  if (!upstream.ok) {
+    const err = await upstream.json().catch(() => ({}));
+    return NextResponse.json(err, { status: upstream.status });
+  }
+
+  const data = await upstream.json();
+  const chat = data.chat;
+  const chatId = chat?._id?.toString() ?? chat?.id ?? "";
+
+  return NextResponse.json(
+    { ...transformChat(chat ?? {}), id: chatId, _id: chatId },
+    { status: upstream.status === 201 ? 201 : 200 }
+  );
 }
